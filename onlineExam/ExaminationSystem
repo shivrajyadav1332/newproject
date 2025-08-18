@@ -1,0 +1,93 @@
+import javax.swing.*;
+import java.awt.event.*;
+
+public class OnlineExam extends JFrame implements ActionListener {
+    JLabel q, timerLabel;
+    JRadioButton opt1, opt2, opt3, opt4;
+    JButton next;
+    ButtonGroup bg;
+    int count = 0, current = 0, timeLeft = 15;
+
+    String[][] questions = {
+        {"Java is ?", "Language", "OS", "Database", "None", "1"},
+        {"OOP stands for ?", "Object Oriented Program", "Object Online Programming", "Oriented Object Program", "None", "1"},
+        {"Which is not OOP concept?", "Encapsulation", "Polymorphism", "Compilation", "Inheritance", "3"}
+    };
+
+    OnlineExam() {
+        setTitle("Online Exam System");
+        setSize(400, 250);
+        setLayout(null);
+
+        q = new JLabel();
+        q.setBounds(30, 20, 300, 20);
+        add(q);
+
+        opt1 = new JRadioButton(); opt2 = new JRadioButton();
+        opt3 = new JRadioButton(); opt4 = new JRadioButton();
+        opt1.setBounds(50, 50, 200, 20); opt2.setBounds(50, 80, 200, 20);
+        opt3.setBounds(50, 110, 200, 20); opt4.setBounds(50, 140, 200, 20);
+
+        bg = new ButtonGroup();
+        bg.add(opt1); bg.add(opt2); bg.add(opt3); bg.add(opt4);
+
+        add(opt1); add(opt2); add(opt3); add(opt4);
+
+        next = new JButton("Next");
+        next.setBounds(150, 170, 100, 30);
+        next.addActionListener(this);
+        add(next);
+
+        timerLabel = new JLabel("Time left: " + timeLeft);
+        timerLabel.setBounds(280, 10, 100, 20);
+        add(timerLabel);
+
+        loadQuestion();
+
+        // Timer
+        Timer t = new Timer(1000, e -> {
+            timeLeft--;
+            timerLabel.setText("Time left: " + timeLeft);
+            if (timeLeft <= 0) {
+                JOptionPane.showMessageDialog(this, "Time Up! Score: " + count);
+                System.exit(0);
+            }
+        });
+        t.start();
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setVisible(true);
+    }
+
+    void loadQuestion() {
+        q.setText(questions[current][0]);
+        opt1.setText(questions[current][1]);
+        opt2.setText(questions[current][2]);
+        opt3.setText(questions[current][3]);
+        opt4.setText(questions[current][4]);
+        bg.clearSelection();
+    }
+
+    boolean checkAns() {
+        String ans = "";
+        if (opt1.isSelected()) ans = "1";
+        else if (opt2.isSelected()) ans = "2";
+        else if (opt3.isSelected()) ans = "3";
+        else if (opt4.isSelected()) ans = "4";
+        return ans.equals(questions[current][5]);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        if (checkAns()) count++;
+        current++;
+        if (current < questions.length) loadQuestion();
+        else {
+            JOptionPane.showMessageDialog(this, "Exam Over! Score: " + count);
+            System.exit(0);
+        }
+    }
+
+    public static void main(String[] args) {
+        new OnlineExam();
+    }
+}
