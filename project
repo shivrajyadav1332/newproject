@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Clock • Timer • Stopwatch</title>
+<style>
+  :root{
+    --bg:#0f172a;       /* slate-900 */
+    --card:#111827;     /* gray-900 */
+    --muted:#94a3b8;    /* slate-400 */
+    --text:#e5e7eb;     /* gray-200 */
+    --accent:#3b82f6;   /* blue-500 */
+    --accent-2:#22c55e; /* green-500 */
+    --accent-3:#f59e0b; /* amber-500 */
+    --danger:#ef4444;   /* red-500 */
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,Segoe UI,Roboto,Arial; color:var(--text);
+    background: radial-gradient(1200px 700px at 20% -10%, #1f2937 0, var(--bg) 45%),
+                radial-gradient(1200px 700px at 120% 120%, #1e293b 0, var(--bg) 45%);
+    min-height:100svh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  .app{
+    width:min(980px, 100%); background:rgba(17,24,39,.75); backdrop-filter: blur(8px);
+    border:1px solid #1f2937; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.45);
+    overflow:hidden;
+  }
+  header{ display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid #1f2937}
+  .title{ font-weight:700; letter-spacing:.3px}
+  .tabs{ display:flex; gap:8px; flex-wrap:wrap}
+  .tab-btn{
+    background:#0b1220; color:var(--muted); border:1px solid #1f2937;
+    padding:8px 14px; border-radius:999px; cursor:pointer; transition:.2s;
+  }
+  .tab-btn[aria-selected="true"]{ color:white; border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+  main{ padding:22px; display:grid; gap:22px}
+  .card{
+    background:linear-gradient(180deg, #0b1220, #0a0f1a);
+    border:1px solid #1f2937; border-radius:16px; padding:20px; display:grid; gap:18px;
+  }
+  .big{
+    font-size: clamp(36px, 7vw, 64px);
+    letter-spacing: .04em; text-align:center; font-variant-numeric: tabular-nums;
+  }
+  .sub{ text-align:center; color:var(--muted); margin-top:-10px}
+  .row{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:center}
+  input[type="number"]{
+    width:90px; padding:10px 12px; border-radius:10px; border:1px solid #233044; background:#0b1220; color:var(--text);
+    font-size:16px; text-align:center; appearance:textfield;
+  }
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
+  .btn{
+    padding:10px 14px; border-radius:10px; border:1px solid #233044; background:#0b1220; color:#e5e7eb;
+    cursor:pointer; min-width:90px; transition:.2s; font-weight:600;
+  }
+  .btn:hover{ transform:translateY(-1px)}
+  .btn:disabled{ opacity:.5; cursor:not-allowed; transform:none}
+  .primary{ border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent)}
+  .success{ border-color:var(--accent-2); box-shadow:inset 0 0 0 1px var(--accent-2)}
+  .warn{ border-color:var(--accent-3); box-shadow:inset 0 0 0 1px var(--accent-3)}
+  .danger{ border-color:var(--danger); box-shadow:inset 0 0 0 1px var(--danger)}
+  .list{ max-height:220px; overflow:auto; border:1px dashed #233044; border-radius:12px; padding:10px}
+  .list .item{ display:flex; justify-content:space-between; padding:8px 10px; border-bottom:1px dashed #233044; font-variant-numeric: tabular-nums; }
+  .list .item:last-child{ border-bottom:0 }
+  .pill{ padding:4px 8px; border-radius:999px; border:1px solid #233044; color:var(--muted); font-size:12px}
+  footer{ text-align:center; padding:8px 0 16px; color:var(--muted); font-size:12px}
+  @media (max-width:640px){
+    header{ flex-direction:column; gap:10px; align-items:flex-start}
+    .row{ justify-content:stretch }
+    .btn{ flex:1 }
+  }
+</style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header>
+      <div class="title">⏱️ Digital Clock • Timer • Stopwatch</div>
+      <nav class="tabs" role="tablist" aria-label="Modes">
+        <button class="tab-btn" role="tab" aria-selected="true" data-tab="clock">Clock</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="timer">Timer</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="stopwatch">Stopwatch</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- CLOCK -->
+      <section class="card" id="clock" role="tabpanel" aria-labelledby="Clock">
+        <div class="big" id="clockDisplay">--:--:--</div>
+        <div class="sub" id="clockDate">—</div>
+        <div class="row" style="justify-content:center">
+          <label class="pill"><input type="checkbox" id="clock-24h" checked> 24-hour</label>
+          <label class="pill"><input type="checkbox" id="clock-seconds" checked> Show seconds</label>
+        </div>
+      </section>
+
+      <!-- TIMER -->
+      <section class="card" id="timer" role="tabpanel" hidden>
+        <div class="big" id="timerDisplay">00:00.0</div>
+        <div class="row">
+          <input type="number" id="tMin" min="0" placeholder="Min">
+          <input type="number" id="tSec" min="0" max="59" placeholder="Sec">
+          <button class="btn primary" id="tStart">Start</button>
+          <button class="btn warn" id="tPause" disabled>Pause</button>
+          <button class="btn success" id="tResume" disabled>Resume</button>
+          <button class="btn danger" id="tReset" disabled>Reset</button>
+        </div>
+        <div class="row" style="justify-content:center">
+          <label class="pill"><input type="checkbox" id="tBeep"> Beep at end</label>
+          <span class="pill" id="tStatus">Ready</span>
+        </div>
+      </section>
+
+      <!-- STOPWATCH -->
+      <section class="card" id="stopwatch" role="tabpanel" hidden>
+        <div class="big" id="swDisplay">00:00.00</div>
+        <div class="row">
+          <button class="btn primary" id="swStart">Start</button>
+          <button class="btn warn" id="swLap" disabled>Lap</button>
+          <button class="btn" id="swPause" disabled>Pause</button>
+          <button class="btn success" id="swResume" disabled>Resume</button>
+          <button class="btn danger" id="swReset" disabled>Reset</button>
+        </div>
+        <div class="list" id="lapList" aria-live="polite" aria-label="Lap times"></div>
+      </section>
+    </main>
+
+    <footer>Built with vanilla HTML • CSS • JS — perfect for campus placements.</footer>
+  </div>
+
+<script>
+/* ---------- Tab Navigation ---------- */
+const tabs = document.querySelectorAll('.tab-btn');
+const panels = { clock: '#clock', timer: '#timer', stopwatch: '#stopwatch' };
+tabs.forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    tabs.forEach(b=>b.setAttribute('aria-selected','false'));
+    btn.setAttribute('aria-selected','true');
+    Object.values(panels).forEach(sel=>document.querySelector(sel).hidden = true);
+    document.querySelector(panels[btn.dataset.tab]).hidden = false;
+  });
+});
+
+/* ---------- Utility ---------- */
+const pad = (n, len=2) => n.toString().padStart(len,'0');
+
+/* ---------- CLOCK ---------- */
+(function clockModule(){
+  const disp = document.getElementById('clockDisplay');
+  const
