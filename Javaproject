@@ -1,0 +1,136 @@
+import java.util.*;
+
+class User {
+    String username;
+    String password;
+    double balance;
+    List<String> transactions;
+
+    public User(String username, String password, double balance) {
+        this.username = username;
+        this.password = password;
+        this.balance = balance;
+        this.transactions = new ArrayList<>();
+        transactions.add("Account created with balance: " + balance);
+    }
+
+    public boolean authenticate(String pass) {
+        return this.password.equals(pass);
+    }
+
+    public void deposit(double amount) {
+        balance += amount;
+        transactions.add("Deposited: " + amount + " | Balance: " + balance);
+    }
+
+    public void withdraw(double amount) {
+        if (amount <= balance) {
+            balance -= amount;
+            transactions.add("Withdrew: " + amount + " | Balance: " + balance);
+        } else {
+            System.out.println("❌ Insufficient Balance!");
+        }
+    }
+
+    public void showBalance() {
+        System.out.println("Current Balance: " + balance);
+    }
+
+    public void showTransactions() {
+        System.out.println("📜 Transaction History:");
+        for (String t : transactions) {
+            System.out.println(t);
+        }
+    }
+}
+
+public class OnlineBankingSystem {
+    static Scanner sc = new Scanner(System.in);
+    static Map<String, User> users = new HashMap<>();
+
+    public static void main(String[] args) {
+        while (true) {
+            System.out.println("\n===== ONLINE BANKING SYSTEM =====");
+            System.out.println("1. Register");
+            System.out.println("2. Login");
+            System.out.println("3. Exit");
+            System.out.print("Choose option: ");
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1 -> register();
+                case 2 -> login();
+                case 3 -> {
+                    System.out.println("Thank you for using Online Banking!");
+                    return;
+                }
+                default -> System.out.println("Invalid choice!");
+            }
+        }
+    }
+
+    static void register() {
+        System.out.print("Enter username: ");
+        String uname = sc.next();
+        if (users.containsKey(uname)) {
+            System.out.println("❌ User already exists!");
+            return;
+        }
+        System.out.print("Enter password: ");
+        String pass = sc.next();
+        System.out.print("Enter initial deposit: ");
+        double balance = sc.nextDouble();
+
+        User user = new User(uname, pass, balance);
+        users.put(uname, user);
+        System.out.println("✅ Registration successful!");
+    }
+
+    static void login() {
+        System.out.print("Enter username: ");
+        String uname = sc.next();
+        System.out.print("Enter password: ");
+        String pass = sc.next();
+
+        User user = users.get(uname);
+        if (user != null && user.authenticate(pass)) {
+            System.out.println("✅ Login successful!");
+            dashboard(user);
+        } else {
+            System.out.println("❌ Invalid credentials!");
+        }
+    }
+
+    static void dashboard(User user) {
+        while (true) {
+            System.out.println("\n===== DASHBOARD =====");
+            System.out.println("1. Check Balance");
+            System.out.println("2. Deposit Money");
+            System.out.println("3. Withdraw Money");
+            System.out.println("4. View Transactions");
+            System.out.println("5. Logout");
+            System.out.print("Choose option: ");
+            int choice = sc.nextInt();
+
+            switch (choice) {
+                case 1 -> user.showBalance();
+                case 2 -> {
+                    System.out.print("Enter amount: ");
+                    double amt = sc.nextDouble();
+                    user.deposit(amt);
+                }
+                case 3 -> {
+                    System.out.print("Enter amount: ");
+                    double amt = sc.nextDouble();
+                    user.withdraw(amt);
+                }
+                case 4 -> user.showTransactions();
+                case 5 -> {
+                    System.out.println("Logging out...");
+                    return;
+                }
+                default -> System.out.println("Invalid choice!");
+            }
+        }
+    }
+}
